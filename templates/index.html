@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Djezzy Customer Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark">DZ</div>
+          <div>
+            <div class="eyebrow">Djezzy Algeria</div>
+            <h1>Djezzy Customer Intelligence</h1>
+          </div>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="search-panel card">
+          <div class="search-header">
+            <h2>Customer Search</h2>
+            <button id="resetBtn" class="secondary-btn">Reset</button>
+          </div>
+
+          <div class="search-row">
+            <input
+              id="customerIdInput"
+              type="text"
+              placeholder="Enter customer ID"
+              aria-label="Customer ID"
+            />
+            <button id="searchBtn" class="primary-btn">Search</button>
+          </div>
+          <div id="statusMessage" class="status-message hidden"></div>
+        </section>
+
+        <section class="summary-grid" id="summaryGrid"></section>
+
+        <section class="result-area hidden" id="resultArea">
+          <div class="card customer-card">
+            <div class="section-title-row">
+              <h3>Customer Overview</h3>
+            </div>
+            <div id="customerOverview" class="customer-grid"></div>
+          </div>
+
+          <div class="card prediction-card">
+            <div class="section-title-row">
+              <h3>Prediction</h3>
+            </div>
+            <div id="predictionPanel" class="prediction-panel"></div>
+          </div>
+
+          <div class="card explanation-card">
+            <div class="section-title-row">
+              <h3>Assigned State & Explanation</h3>
+            </div>
+            <div id="statePanel"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
