@@ -305,11 +305,21 @@ def classify_customer(customer_id: str):
 def summary_counts():
     df = get_dataset()
     summary = []
-    for customer_id, row in df.iterrows():
-        model = get_model()
-        feature_row = row.drop(labels=["customerID", "Churn", "gender"])
-        prob = float(model.predict_proba(pd.DataFrame([feature_row]))[0, 1])
-        state, _ = assign_state(row, prob, df)
+    # Load model once to avoid heavy repeated deserialization and speed up response
+    model = get_model()
+    # Build a feature frame and predict probabilities in batch for performance
+    features = df.drop(columns=["customerID", "Churn", "gender"])
+    try:
+        probs = model.predict_proba(features)[:, 1]
+    except Exception:
+        # Fallback to per-row prediction if batch predict fails for any reason
+        probs = []
+        for _, row in df.iterrows():
+            feature_row = row.drop(labels=["customerID", "Churn", "gender"])
+            probs.append(float(model.predict_proba(pd.DataFrame([feature_row]))[0, 1]))
+
+    for (_, row), prob in zip(df.iterrows(), probs):
+        state, _ = assign_state(row, float(prob), df)
         summary.append({"customerID": row["customerID"], "state": state})
     counts = pd.Series([item["state"] for item in summary]).value_counts().to_dict()
     return {
