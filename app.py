@@ -18,6 +18,39 @@ def get_dataset() -> pd.DataFrame:
     df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
     df = df.dropna(subset=["TotalCharges"]).copy()
     df["Churn"] = df["Churn"].map({"No": 0, "Yes": 1})
+
+    # Simple, explainable feature engineering to match training pipeline
+    # tenure_band
+    if "tenure" in df.columns:
+        df["tenure_band"] = pd.cut(df["tenure"], bins=[-1, 12, 24, 48, 72, np.inf], labels=["0-12", "13-24", "25-48", "49-72", "73+"])
+    # charges_per_month
+    if "TotalCharges" in df.columns and "tenure" in df.columns:
+        def _charges_per_month(r):
+            try:
+                if pd.notna(r["TotalCharges"]) and r.get("tenure") and r["tenure"] > 0:
+                    return r["TotalCharges"] / r["tenure"]
+            except Exception:
+                pass
+            return r.get("MonthlyCharges")
+
+        df["charges_per_month"] = df.apply(_charges_per_month, axis=1)
+    # num_services: count of positive service flags
+    service_cols = [
+        c for c in [
+            "PhoneService",
+            "MultipleLines",
+            "InternetService",
+            "OnlineSecurity",
+            "OnlineBackup",
+            "DeviceProtection",
+            "TechSupport",
+            "StreamingTV",
+            "StreamingMovies",
+        ]
+        if c in df.columns
+    ]
+    if service_cols:
+        df["num_services"] = df[service_cols].apply(lambda col: col.map({"Yes": 1, "No": 0}).fillna(0)).sum(axis=1)
     return df
 
 
@@ -262,7 +295,8 @@ def classify_customer(customer_id: str):
 
     row = customer.iloc[0]
     model = get_model()
-    feature_row = row.drop(labels=["customerID", "Churn", "gender"])
+    # prepare features robustly (ignore labels that may not exist)
+    feature_row = row.drop(labels=[c for c in ["customerID", "Churn", "gender"] if c in row.index], errors="ignore")
     churn_probability = float(model.predict_proba(pd.DataFrame([feature_row]))[0, 1])
     predicted_churn = int(model.predict(pd.DataFrame([feature_row]))[0])
     actual_churn = int(row["Churn"]) if "Churn" in row and pd.notna(row["Churn"]) else None
@@ -308,7 +342,8 @@ def summary_counts():
     # Load model once to avoid heavy repeated deserialization and speed up response
     model = get_model()
     # Build a feature frame and predict probabilities in batch for performance
-    features = df.drop(columns=["customerID", "Churn", "gender"])
+    to_drop = [c for c in ["customerID", "Churn", "gender"] if c in df.columns]
+    features = df.drop(columns=to_drop)
     try:
         probs = model.predict_proba(features)[:, 1]
     except Exception:
