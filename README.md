@@ -1,4 +1,4 @@
-# Customer Churn Prediction — Djezzy Internship
+# Customer Churn Prediction 
 
 > An end-to-end machine learning project developed during my internship at **Djezzy Algeria** to predict customer churn and transform model predictions into actionable customer-risk states.
 
