@@ -1,33 +1,79 @@
-# Customer Churn Prediction — Djezzy
+# Customer Churn Prediction — Djezzy Internship
 
-> Machine learning project developed during my internship at **Djezzy Algeria** to identify customers who are at risk of churning and support customer-retention decisions.
+> An end-to-end machine learning project developed during my internship at **Djezzy Algeria** to predict customer churn and transform model predictions into actionable customer-risk states.
 
 ## Overview
 
-Customer churn is a major challenge for telecom companies: identifying customers who may leave early can give the company an opportunity to take action and improve retention.
+Customer churn is an important challenge for telecom companies. If customers at risk of leaving can be identified early, the company can potentially take targeted retention actions.
 
-This project develops a **customer churn prediction system** that estimates the probability that a customer will leave the service.
+During my internship at Djezzy, I worked on a **customer churn prediction system** designed to answer:
 
-The project covers the complete ML workflow:
+> **"Which customers are likely to leave, and which customers should the company pay attention to?"**
 
-**Data → Analysis → Feature Engineering → Model Training → Evaluation → Threshold Selection → Customer Risk Classification → Prediction Platform**
+The project goes beyond simply predicting `Churn = Yes/No`.
+
+The final solution transforms the prediction into five business-oriented customer states:
+
+**Left → May Leave → Stable → May Become Loyal → Loyal**
+
+This makes the machine learning output easier to understand and potentially more useful for a business user.
+
+---
+
+## Project Workflow
+
+The project follows an end-to-end machine learning workflow:
+
+ 
+Customer Data
+     ↓
+Data Cleaning & Preprocessing
+     ↓
+Exploratory Data Analysis
+     ↓
+Feature Engineering
+     ↓
+Model Training & Comparison
+     ↓
+Model Evaluation
+     ↓
+Probability Threshold Tuning
+     ↓
+Customer Risk Classification
+     ↓
+Business-Oriented Customer States
+     ↓
+Prediction Platform
+  
+
+---
 
 ## Business Objective
 
-The main goal is not simply to maximize accuracy.
+The objective was to build a system capable of identifying customers who may be at risk of churn.
 
-For a churn-prevention system, **missing a customer who is actually going to leave (False Negative)** can be costly because the company loses the opportunity to intervene.
+In a churn-retention scenario, **false negatives** are particularly important.
 
-Therefore, the project places particular attention on **churn recall**, while still considering precision and overall accuracy.
+A false negative occurs when:
 
-## Dataset
+> The model predicts that a customer will stay, but the customer actually churns.
 
-The project uses a telecom customer dataset containing information such as:
+Missing such a customer means the company may lose the opportunity to intervene.
+
+For this reason, the project places strong emphasis on **churn recall**, while still monitoring accuracy, precision, and F1-score.
+
+---
+
+# Dataset
+
+The dataset contains **7,043 customer records** and **21 variables** before preprocessing.
+
+It includes information such as:
 
 * Customer demographics
 * Tenure
 * Contract type
-* Internet and phone services
+* Phone and internet services
 * Additional subscribed services
 * Payment method
 * Monthly charges
@@ -36,38 +82,72 @@ The project uses a telecom customer dataset containing information such as:
 
 The target variable is:
 
-* `0` → Customer stays
-* `1` → Customer churns
+ 
+No  → 0
+Yes → 1
+  
 
-> **Note:** The original customer dataset is not included in this public repository.
+### Data preprocessing
 
-## Exploratory Data Analysis
+`TotalCharges` was converted to a numerical variable, with invalid values identified as missing values.
 
-The analysis focused on identifying patterns associated with customer churn.
+After preprocessing, the final dataset contained:
 
-Some of the most important factors explored were:
+**7,032 customers**
 
-* **Tenure**
-* **Monthly Charges**
-* **Contract Type**
-* Number of subscribed services
-* Customer service characteristics
+with the cleaned data used for analysis and modeling.
 
-The analysis showed that churn behavior is not uniform across customers and that several customer characteristics can provide useful predictive signals.
+> The original customer dataset is not included in this repository.
 
-## Feature Engineering
+---
 
-Additional features were explored to provide the models with more useful information, including:
+# Exploratory Data Analysis
 
-* `tenure_band` — groups customers according to their tenure
-* `charges_per_month` — derived from customer charge information
-* `num_services` — number of subscribed services
+The analysis focused on understanding which customer characteristics were associated with churn.
 
-Categorical variables were also encoded so they could be used by the machine learning models.
+Some of the main variables investigated were:
 
-## Models
+### Tenure
 
-Several classification approaches were explored and compared during the project, including:
+Customer tenure was analyzed to understand how churn behavior changes depending on how long a customer has been with the company.
+
+### Monthly Charges
+
+Monthly charges were examined as a potential indicator of customer churn behavior.
+
+### Contract Type
+
+Contract type was one of the key variables explored because customers under different contract structures can exhibit different churn patterns.
+
+Other service-related variables were also considered during the analysis.
+
+---
+
+# Feature Engineering
+
+Additional features were created to provide the models with more useful information.
+
+Examples include:
+
+### `tenure_band`
+
+Groups customers into different tenure ranges.
+
+### `charges_per_month`
+
+A derived feature based on customer charge information.
+
+### `num_services`
+
+Represents the number of subscribed services associated with a customer.
+
+Categorical variables were also encoded so that they could be used by machine learning models.
+
+---
+
+# Model Development
+
+Several classification approaches were explored during the project, including:
 
 * Logistic Regression
 * Decision Tree
@@ -75,127 +155,276 @@ Several classification approaches were explored and compared during the project,
 * Gradient Boosting
 * XGBoost
 * Ensemble approaches
+* Stacking
 
-The experiments helped evaluate the trade-off between **accuracy, precision, recall, and F1-score**.
+The models were evaluated using several metrics rather than relying only on accuracy.
 
-## Final Model
+The main metrics considered were:
 
-The final solution uses a **Random Forest classifier**.
+* Accuracy
+* Precision
+* Recall
+* F1-score
+* Confusion Matrix
 
-Instead of automatically using the default probability threshold of `0.50`, the prediction threshold was adjusted according to the business objective.
+---
 
-### Operating threshold: `0.40`
+# Model Evaluation
 
-At this threshold, the model achieved:
+A Logistic Regression baseline achieved:
 
 | Metric          |     Result |
 | --------------- | ---------: |
-| Accuracy        | **71.82%** |
-| Churn Recall    | **85.29%** |
-| Churn Precision | **48.26%** |
-| Churn F1-score  | **61.64%** |
+| Accuracy        | **80.38%** |
+| Churn Precision |    **65%** |
+| Churn Recall    |    **57%** |
+| Churn F1-score  |    **61%** |
 
-### Confusion Matrix
+The Random Forest and ensemble experiments were then used to explore whether the model could identify a larger proportion of customers who actually churn.
 
-|                  | Predicted Stay | Predicted Churn |
-| ---------------- | -------------: | --------------: |
-| **Actual Stay**  |            693 |             342 |
-| **Actual Churn** |             55 |             319 |
+The final operating configuration focused on improving **churn recall**.
 
-The threshold was selected to prioritize identifying a larger proportion of customers who actually churn, accepting a higher number of false positives in the process.
+---
 
-## Why Recall Matters
+# Probability Threshold Tuning
 
-In this business context, a **False Negative** means:
+A classification model does not have to use `0.50` as its probability threshold.
 
-> The model predicts that a customer will stay, but the customer actually churns.
+Instead, different thresholds were tested to understand the trade-off between:
 
-These customers can be missed by a retention campaign.
+* identifying more customers who churn,
+* generating more false positives,
+* and maintaining reasonable overall performance.
 
-A **False Positive** means:
+### Threshold comparison
 
-> The model predicts that a customer may churn, but the customer actually stays.
+| Threshold |   Accuracy | Churn Recall |  Precision |   F1-score |
+| --------: | ---------: | -----------: | ---------: | ---------: |
+|      0.30 |     67.10% |       91.20% |     44.20% |     59.60% |
+|      0.35 |     69.50% |       86.40% |     46.00% |     60.00% |
+|  **0.40** | **71.82%** |   **85.29%** | **48.26%** | **61.64%** |
+|      0.45 |     73.70% |       82.90% |     50.30% |     62.60% |
 
-This can lead to unnecessary retention actions.
+### Final operating threshold: `0.40`
 
-The threshold therefore represents a **business trade-off**, rather than simply a mathematical optimization.
+A threshold of **0.40** was used for the final operating configuration.
 
-## Customer Risk Classification
+At this threshold:
 
-The prediction system can translate the model's output into customer states such as:
+* **Accuracy:** 71.82%
+* **Churn Recall:** 85.29%
+* **Churn Precision:** 48.26%
+* **F1-score:** 61.64%
 
-* **Left**
-* **May Leave**
-* **Stable**
-* **May Become Loyal**
-* **Loyal**
+The choice reflects the project's business objective of detecting a high proportion of customers at risk of churn, while accepting that this produces more false positives.
 
-The goal is to make the prediction easier to interpret for a non-technical user rather than displaying only a probability.
+---
 
-For each prediction, the platform can also provide the main factors considered when determining the customer's state.
+# Confusion Matrix
 
-## Prediction Platform
+At the final threshold of `0.40`:
 
-A simple interface was developed to demonstrate how the model could be used in practice.
+ 
+                    Predicted
+                  Stay    Churn
+Actual Stay        693     342
+Actual Churn        55     319
+  
 
-The user can provide a **customer ID** and receive:
+This means the model correctly identified **319 customers who churned**, while **55 actual churners were missed**.
 
-* Predicted customer state
-* Churn risk
-* Supporting factors
-* Prediction information
+At the same time, **342 customers who stayed were classified as potential churners**, illustrating the precision/recall trade-off.
 
-The interface was designed around a **Djezzy-inspired visual identity** to demonstrate how the ML model could be integrated into a business-facing application.
+---
 
-*The exact structure may vary depending on the final organization of the repository.*
+# From Churn Probability to Business States
 
-## Technologies
+One of the main goals of the project was to make the ML output easier to understand for a non-technical user.
+
+Instead of displaying only a probability such as:
+
+ 
+Churn probability = 0.73
+  
+
+the platform translates customer predictions into five business-oriented states:
+
+
+Left
+May Leave
+Stable
+May Become Loyal
+Loyal
+
+
+These states are generated as part of the prediction workflow using the customer's churn-related information and the model's prediction, with each customer assigned to **one business state**.
+
+The five states provide a simpler way of communicating the customer's situation to someone using the platform.
+
+---
+
+# Customer State Distribution
+
+After applying the customer-state classification to the **7,032 customers** in the processed dataset, the distribution was:
+
+| Customer State       | Number of Customers | Percentage |
+| -------------------- | ------------------: | ---------: |
+| **Left**             |               1,044 |     14.85% |
+| **May Leave**        |               1,824 |     25.94% |
+| **Stable**           |               1,518 |     21.59% |
+| **May Become Loyal** |                 843 |     11.99% |
+| **Loyal**            |               1,803 |     25.64% |
+| **Total**            |           **7,032** |   **100%** |
+
+This gives the platform a more intuitive customer-level view instead of presenting only raw model predictions.
+
+### Why these states?
+
+The purpose of the five-state system is to create a gradual interpretation of customer status:
+
+* **Left** → customers identified as having already left
+* **May Leave** → customers showing higher churn risk
+* **Stable** → customers with a relatively stable situation
+* **May Become Loyal** → customers showing lower churn risk and positive signals
+* **Loyal** → customers showing the strongest retention-related signals
+
+The model's churn prediction is therefore converted into a **business-facing interpretation** rather than being presented as a raw machine learning output.
+
+---
+
+# Prediction Platform
+
+A prediction platform was developed to demonstrate how the model could be used in practice.
+
+The user can enter a **Customer ID** and obtain information about that customer, including:
+
+* Customer state
+* Churn prediction
+* Risk-related information
+* The factors used to explain the prediction
+
+The objective was to bridge the gap between a machine learning model and a simple interface that a business user could understand.
+
+---
+
+# Example
+
+Instead of requiring a user to interpret a machine learning probability manually:
+
+ 
+Customer ID
+     ↓
+Model Prediction
+     ↓
+Churn Probability
+     ↓
+Business Classification
+     ↓
+"May Leave"
+  
+
+The platform provides a more understandable representation of the prediction.
+
+---
+
+# Technologies
+
+### Data & Machine Learning
 
 * Python
 * Pandas
 * NumPy
-* Matplotlib
-* Seaborn
 * Scikit-learn
 * XGBoost
+
+### Data Visualization
+
+* Matplotlib
+* Seaborn
+
+### Development
+
 * Jupyter Notebook
-* Machine Learning
-* Data Analysis
-* Classification
+* Python
 
-## Key Takeaways
+---
 
-This project helped me work through a complete applied machine learning workflow, from raw customer data to a business-oriented prediction system.
+# What I Learned
 
-In particular, I gained practical experience with:
+This project gave me practical experience with the complete machine learning pipeline, including:
 
-* Data cleaning and preprocessing
+* Data cleaning
+* Handling missing values
 * Exploratory data analysis
 * Feature engineering
-* Classification models
+* Categorical encoding
+* Classification algorithms
 * Ensemble learning
-* Model evaluation
+* Model comparison
+* Stratified evaluation
 * Confusion matrices
-* Precision vs. recall trade-offs
+* Precision vs. recall
 * Probability threshold tuning
-* Translating ML predictions into business-oriented decisions
-* Integrating a machine learning model into a simple application
+* Translating ML predictions into business concepts
+* Building a prediction interface
 
-## Internship Context
+One of the most important lessons was that **the model with the highest accuracy is not necessarily the best configuration for a specific business objective**.
 
-This project was developed during my internship at **Djezzy Algeria**, where I worked on applying machine learning to a customer churn prediction problem.
+The appropriate evaluation depends on what the company is trying to achieve.
 
-The project combines **data analysis, machine learning, and application development** to demonstrate how predictive models can support customer-retention strategies.
+---
 
-## Disclaimer
+# Project Highlights
+
+### End-to-end ML workflow
+
+From raw customer data to a usable prediction system.
+
+### Business-oriented modeling
+
+The project considers the consequences of false negatives and false positives instead of optimizing accuracy alone.
+
+### Threshold optimization
+
+The classification threshold was explicitly tested and adjusted according to the project's churn-detection objective.
+
+### Five-level customer classification
+
+Model predictions were translated into:
+
+**Left · May Leave · Stable · May Become Loyal · Loyal**
+
+### Application layer
+
+The final model was integrated into a customer prediction platform to demonstrate how the ML workflow could be used by a non-technical user.
+
+---
+
+# Internship Context
+
+This project was developed during my internship at **Djezzy Algeria**.
+
+The internship provided an opportunity to apply machine learning concepts to a real business-oriented problem and to work through the process of turning customer data into a predictive solution.
+
+The project combines:
+
+**Data Analysis + Machine Learning + Business Reasoning + Application Development**
+
+---
+
+# Disclaimer
 
 This repository is intended for **educational and portfolio purposes**.
 
 The dataset used for experimentation is a publicly available telecom churn dataset and does not contain confidential Djezzy customer information.
 
-The project is a predictive prototype and should not be interpreted as a production-ready churn management system.
+The model is a predictive prototype and should not be considered a production-ready customer-retention system.
 
 ---
 
-**Author:** AYA
-**Computer Science Engineering Student — ESI Algiers**
+## Author
+
+**AYA**
+Computer Science Engineering Student — ESI Algiers
+
+Interested in **Machine Learning, Data Science, and AI**.
